@@ -9,12 +9,12 @@ import random
 def GetRandomName():
     files = os.listdir(ROOT_PATH + "/Images")
 
-    file = os.path.splitext(random.choice(files))[0]
+    file_name = os.path.splitext(random.choice(files))[0]
 
-    if not os.path.exists(ROOT_PATH + "/ASCII/" + file + ".json"):
-        import regenerate
+    if not os.path.exists(ROOT_PATH + "/ASCII/" + file_name + ".json"):
+        main.GenerateImage(file_name)
 
-    return os.path.splitext(file)[0]
+    return file_name
 
 
 config_name = GetRandomName()

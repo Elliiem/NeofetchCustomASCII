@@ -13,3 +13,5 @@ for file in files:
     file = open(ROOT_PATH + "/ASCII/" + name + ".out")
     print(file.read())
     file.close()
+
+print("\033[0m")

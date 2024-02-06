@@ -1,17 +1,22 @@
-import main
-from config import ROOT_PATH
-
 import os
 
-files = os.listdir(ROOT_PATH + "/Images")
+import main
 
-for file in files:
-    name = os.path.splitext(file)[0]
 
-    main.GenerateImage(name)
+def GenerateRecurse(images_path):
+    files = main.GetFilesRecurse(images_path)
 
-    file = open(ROOT_PATH + "/ASCII/" + name + ".out")
-    print(file.read())
-    file.close()
+    for file in files:
+        file = os.path.splitext(file)[0]
 
-print("\033[0m")
+        main.GenerateImage(file)
+
+        out = main.OpenOut(file, "r")
+        print(out.read())
+        print("\033[0m")
+        out.close()
+
+
+GenerateRecurse(
+    "/home/elliem/Dev/Scripts/1st-Party/python/NeofetchCustomASCII/Images",
+)

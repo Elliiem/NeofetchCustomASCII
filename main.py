@@ -1,8 +1,65 @@
 from PIL import Image
+
 import json
 import os
 
-from config import ROOT_PATH, DEFAULT_BLOCK_WIDTH, DEFAULT_BLOCK_CHAR
+from config import DEFAULT_BLOCK_WIDTH, DEFAULT_BLOCK_CHAR, IMAGE_PATH, ASCII_PATH
+
+if not os.path.exists(IMAGE_PATH):
+    os.makedirs(IMAGE_PATH, exist_ok=True)
+
+if not os.path.exists(ASCII_PATH):
+    os.makedirs(ASCII_PATH, exist_ok=True)
+
+
+def OpenFile(file_path, mode):
+    dir = os.path.dirname(file_path)
+
+    if mode == "r" or mode == "r+":
+        if not os.path.exists(file_path):
+            raise Exception("Trying to read from imaginary file")
+    else:
+        if not os.path.exists(dir):
+            os.makedirs(dir, exist_ok=True)
+
+    return open(file_path, mode)
+
+
+def GetOutPath(rel_name_path):
+    return ASCII_PATH + rel_name_path + ".out"
+
+
+def OpenOut(rel_name_path, mode):
+    out_path = GetOutPath(rel_name_path)
+
+    return OpenFile(out_path, mode)
+
+
+def GetImagePath(rel_name_path):
+    return IMAGE_PATH + rel_name_path + ".png"
+
+
+def OpenImg(rel_name_path):
+    image_path = GetImagePath(rel_name_path)
+
+    if not os.path.exists(image_path):
+        raise Exception("Image does not exist!")
+
+    return Image.open(image_path)
+
+
+def GetConfigPath(rel_name_path):
+    return ASCII_PATH + rel_name_path + ".json"
+
+
+def OpenConf(rel_name_path, mode):
+    config_path = GetConfigPath(rel_name_path)
+
+    return OpenFile(config_path, mode)
+
+
+def HasConfig(rel_name_path):
+    return os.path.exists(GetConfigPath(rel_name_path))
 
 
 def GetPixelString(px, prev_px, block_width, block_char):
@@ -14,20 +71,22 @@ def GetPixelString(px, prev_px, block_width, block_char):
     escape = "\033[38;2;" + str(r) + ";" + str(g) + ";" + str(b) + "m"
     block = block_char * block_width
 
-    if a != 255:
+    if a == 0:
         return " " * block_width
-    elif prev_px == None:
-        return escape + block
-    elif px != prev_px and prev_px[3] == 255:
-        return escape + block
-    else:
+    elif prev_px == px:
         return block
 
+    return escape + block
 
-def GenerateASCII(name, block_width, block_char):
-    img = Image.open(ROOT_PATH + "/Images/" + name + ".png")
-    out = open(ROOT_PATH + "/ASCII/" + name + ".out", "w")
 
+def GenerateASCII(rel_name_path, block_width, block_char):
+    # Open Image
+    img = OpenImg(rel_name_path)
+
+    # Open Output file
+    out = OpenOut(rel_name_path, "w")
+
+    # Create ASCII
     line = " "
     prev = None
 
@@ -37,58 +96,73 @@ def GenerateASCII(name, block_width, block_char):
 
             line += GetPixelString(px, prev, block_width, block_char)
 
-            if px[3] == 255:
-                prev = px
+            prev = px
 
         out.write(line + "\n")
 
         line = " "
 
+    # Close Image and Out
     img.close()
     out.close()
 
 
-def GenerateImage(name, block_width=DEFAULT_BLOCK_WIDTH, block_char=DEFAULT_BLOCK_CHAR):
-    json_exists = os.path.exists(ROOT_PATH + "/ASCII/" + name + ".json")
-
-    if json_exists:
-        config_file = open(ROOT_PATH + "/ASCII/" + name + ".json", "r")
+def GenerateImage(rel_name_path, block_width=DEFAULT_BLOCK_WIDTH, block_char=DEFAULT_BLOCK_CHAR):
+    # Load config
+    if HasConfig(rel_name_path):
+        config_file = OpenConf(rel_name_path, "r")
         config = json.load(config_file)
-
-        if "block_width" in config:
-            block_width = config["block_width"]
-
-        if "block_char" in config:
-            block_char = config["block_char"]
+        config_file.close()
     else:
         config = {}
-        config_file = open(ROOT_PATH + "/ASCII/" + name + ".json", "w")
 
-    GenerateASCII(name, block_width, block_char)
+    # Overwrite defaults with config
+    if "block_width" in config:
+        block_width = config["block_width"]
 
-    if not "path" in config:
-        config["path"] = ROOT_PATH + "/ASCII/" + name + ".out"
+    if "block_char" in config:
+        block_char = config["block_char"]
 
-    if not "offset" in config:
-        img = Image.open(ROOT_PATH + "/Images/" + name + ".png")
-        out = open(ROOT_PATH + "/ASCII/" + name + ".out", "r")
+    # Generate .out file
+    GenerateASCII(rel_name_path, block_width, block_char)
 
-        lines = out.readlines()
+    # Calculate offset
+    img = OpenImg(rel_name_path)
+    out = OpenOut(rel_name_path, "r")
 
-        longest = 0
-        for line in lines:
-            if len(line) > longest:
-                longest = len(line)
+    lines = out.readlines()
+    longest = 0
 
-        config["offset"] = (-(longest - img.width * block_width)) + 3
+    for line in lines:
+        if len(line) > longest:
+            longest = len(line)
 
-        out.close()
-        img.close()
+    config["offset"] = -(longest - img.width * block_width) + 3
 
-    if json_exists:
-        config_file.close()
-        config_file = open(ROOT_PATH + "/ASCII/" + name + ".json", "w")
+    out.close()
+    img.close()
 
+    # Write new config to json
+    config_file = OpenConf(rel_name_path, "w")
     json.dump(config, config_file)
-
     config_file.close()
+
+
+def GetFilesRecurse(root_path, name_rel_path=""):
+    files = os.listdir(root_path + name_rel_path)
+
+    dirs = []
+
+    i = 0
+    while i < len(files):
+        if os.path.isdir(root_path + name_rel_path + "/" + files[i]):
+            dirs.append(name_rel_path + "/" + files[i])
+            files.pop(i)
+        else:
+            files[i] = name_rel_path + "/" + files[i]
+            i += 1
+
+    for dir in dirs:
+        files += GetFilesRecurse(root_path, dir)
+
+    return files

@@ -1,32 +1,31 @@
-import main
-from config import ROOT_PATH
-
 import json
 import os
 import random
 
-
-def GetRandomName():
-    files = os.listdir(ROOT_PATH + "/Images")
-
-    file_name = os.path.splitext(random.choice(files))[0]
-
-    if not os.path.exists(ROOT_PATH + "/ASCII/" + file_name + ".json"):
-        main.GenerateImage(file_name)
-
-    return file_name
+import main
 
 
-config_name = GetRandomName()
+def GetRandomRelNamePath():
+    images = main.GetFilesRecurse(main.IMAGE_PATH)
 
-config_file = open(ROOT_PATH + "/ASCII/" + config_name + ".json")
+    if len(images) == 0:
+        raise Exception("No Images Provided!")
 
+    return os.path.splitext(random.choice(images))[0]
+
+
+rel_name_path = GetRandomRelNamePath()
+
+if not main.HasConfig(rel_name_path):
+    main.GenerateImage(rel_name_path)
+
+config_file = main.OpenConf(rel_name_path, "r")
 config = json.load(config_file)
 config_file.close()
 
-path = config["path"]
+out_path = main.GetOutPath(rel_name_path)
 offset = config["offset"]
 
-command = "neofetch --ascii " + path + " --gap " + str(offset)
+command = "neofetch --ascii " + out_path + " --gap " + str(offset)
 
 os.system(command)

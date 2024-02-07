@@ -3,7 +3,7 @@ from PIL import Image
 import json
 import os
 
-from config import DEFAULT_BLOCK_WIDTH, DEFAULT_BLOCK_CHAR, IMAGE_PATH, ASCII_PATH
+from config import *
 
 if not os.path.exists(IMAGE_PATH):
     os.makedirs(IMAGE_PATH, exist_ok=True)
@@ -148,7 +148,10 @@ def GenerateImage(rel_name_path, block_width=DEFAULT_BLOCK_WIDTH, block_char=DEF
     config_file.close()
 
 
-def GetFilesRecurse(root_path, name_rel_path=""):
+def GetFilesRecurse(root_path, name_rel_path="", ignore=[]):
+    if name_rel_path in ignore:
+        return []
+
     files = os.listdir(root_path + name_rel_path)
 
     dirs = []
@@ -163,6 +166,6 @@ def GetFilesRecurse(root_path, name_rel_path=""):
             i += 1
 
     for dir in dirs:
-        files += GetFilesRecurse(root_path, dir)
+        files += GetFilesRecurse(root_path, dir, ignore)
 
     return files

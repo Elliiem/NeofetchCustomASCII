@@ -12,4 +12,5 @@ ASCII_PATH = ROOT_PATH + "/ASCII"
 
 # Ignores a directories in the image path this uses rel_name_paths which are the ending of a path for example
 # if you have a directory called Test in your image path and want to ignore it you add "/Test" in the image ignore
+# a empty string will exclude the all images
 IMAGE_IGNORE = []

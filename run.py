@@ -9,7 +9,8 @@ def GetRandomRelNamePath():
     images = main.GetFilesRecurse(main.IMAGE_PATH, ignore=main.IMAGE_IGNORE)
 
     if len(images) == 0:
-        raise Exception("No Images Provided!")
+        raise Exception(
+            "No Images Provided! Add some images to your images path! (only png's)")
 
     return os.path.splitext(random.choice(images))[0]
 

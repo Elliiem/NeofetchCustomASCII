@@ -1,32 +1,44 @@
-import json
 import os
 import random
+import sys
 
 import main
 
 
-def GetRandomRelNamePath():
-    images = main.GetFilesRecurse(main.IMAGE_PATH, ignore=main.IMAGE_IGNORE)
+def GetRandomSource():
+    sources = main.GetFilesRecurse(main.IMAGE_PATH, ignore=main.IMAGE_IGNORE)
 
-    if len(images) == 0:
+    if len(sources) == 0:
         raise Exception(
             "No Images Provided! Add some images to your images path! (only png's)")
 
-    return os.path.splitext(random.choice(images))[0]
+    split = os.path.splitext(random.choice(sources))
+
+    return (split[0], split[1])
 
 
-rel_name_path = GetRandomRelNamePath()
+if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
+        ext = sys.argv[2]
+    else:
+        ext = main.FindExt(sys.argv[1])
 
-if not main.HasConfig(rel_name_path):
-    main.GenerateImage(rel_name_path)
+    source = (sys.argv[1], ext)
+else:
+    source = GetRandomSource()
 
-config_file = main.OpenConf(rel_name_path, "r")
-config = json.load(config_file)
-config_file.close()
+rel_name_path = source[0]
+ext = source[1]
 
-out_path = main.GetOutPath(rel_name_path)
+if not main.HasConfig(rel_name_path, ext):
+    main.Generate(rel_name_path, ext)
+
+config = main.GetConfig(rel_name_path, ext)
+
+out_path = config["path"]
 offset = config["offset"]
 
-command = "neofetch --ascii " + out_path + " --gap " + str(offset)
+command = "neofetch --ascii --source \"$(cat " + \
+    out_path + ")\" --gap " + str(offset)
 
 os.system(command)

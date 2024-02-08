@@ -1,6 +1,10 @@
 # NeofetchCustomASCII
 NeofetchCustomASCII changes your neofetch ASCII art to pixel art or some other ASCII
 
+![](https://github.com/Elliiem/NeofetchCustomASCII/blob/master/Readme-Images/Trans.png)
+
+![](https://github.com/Elliiem/NeofetchCustomASCII/blob/master/Readme-Images/cat.png)
+
 You can do what this does with built-in neofetch functionallity, I just wanted to implement this myself
 
 ## Usage

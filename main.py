@@ -51,8 +51,6 @@ def FindExt(rel_name_path: str) -> str:
         if file.find(name) != -1:
             canidates.append(file)
 
-    print(canidates)
-
     if len(canidates) == 1:
         return os.path.splitext(canidates[0])[1]
     else:
@@ -247,7 +245,3 @@ def Generate(rel_name_path: str, ext: str = "") -> None:
         GenerateImageConfig(rel_name_path, image, ascii, ext)
 
         ascii.close()
-
-
-Generate("/Art/cat", ".png")
-Generate("/ASCII/cat", ".ascii")

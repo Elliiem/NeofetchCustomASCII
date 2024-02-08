@@ -1,3 +1,5 @@
 __pycache__/
-Images/
-ASCII/
+Images/*
+!Images/.gitkeep
+ASCII/*
+!ASCII/.gitkeep

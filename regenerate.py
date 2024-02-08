@@ -24,16 +24,6 @@ def GenerateRecurse(images_path):
         config_file.close()
 
 
-def Clean():
-    if main.ASCII_PATH == "":
-        return
-
-    # Scary (I learned nothing from steam, pwease lemme delete your filesystem uwu)
-    os.system("rm -rf " + main.ASCII_PATH + "/*")
-
-
-Clean()
-
 GenerateRecurse(
     "/home/elliem/Dev/Scripts/1st-Party/python/NeofetchCustomASCII/Images",
 )

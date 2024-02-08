@@ -7,17 +7,16 @@ NeofetchCustomASCII changes your neofetch ASCII art to pixel art or some other A
 
 You can do what this does with built-in neofetch functionallity, I just wanted to implement this myself
 
-## Usage
-First add a images directory, this can be anything but by default it is "*/NeofetchCustomASCII/Images"
-change the path in cofig.py if you want it in a different place
-
+# Usage
+The Images directory contains all your source images you can put images directly in this directory or add them to subdirectories like this
 ```
-mkdir Images
+Images
+|-- ASCII
+|   `-- cat.ascii
+`-- Image
+    `-- cat.png
 ```
-
-Then add some images in this directory or in a subdirectory of this dir these can currently be pngs (with RGBA colors)
-and files with the extention .ascii which are just plain text documents with the ascii art inside so for example cat.ascii would look like this
-
+Images are identified by their extention so make sure these are correct; a .ascii file is just a plain text document. For example cat.ascii looks like this
 ```
  _._     _,-'""`-._
 (,-.`._,'(       |\`-/|
@@ -25,23 +24,50 @@ and files with the extention .ascii which are just plain text documents with the
           `-    \`_`"'-
 ```
 
+##
 
 run run.py to run neofetch
-
-You can set the image you want by specifying the image you want with the first two arguments.
-The first tells run.py where to find the image the second tells it the extention of said image if you have multiple images with the same name but a different extention for example you have cat.ascii and cat.png in the same subdirectory in your image directory. The first uses the rel_name_path which is just the path relative to the image folder; for example when you have a file at the path "*/NeofetchCustomASCII/Images/Art/cat.ascii" the relative name path would be "/Art/cat" the extention would be ".ascii"
 
 ```
 python run.py
 ```
 
-This should automatically create the ASCII directory here the raw text (.out files) for your image is stored aswell as the corresponding config (the JSON files)
-you can change this path aswell in config.py (make shure this path is actually the path you want as the script runs rm -rf on ASCII_PATH/* when regenerating)
+You can set the image you want by specifying the image you want with the first two arguments.
+The first tells run.py where to find the image the second tells it the extention of said image; this is used to identify images with the same name but have different extention. For example you have cat.ascii and cat.png in the same directory in your image directory; like this.
 
-Run regenerate.py to regenerate your output this removes everything in your out path and regenerates every image and its config
+```
+Images
+|-- cat.ascii
+`-- cat.png
+```
+
+If you dont choose an image a random one is chosen. The IGNORE variable in `config.py` is used to ignore subdirectories from this selection
+
+The first argument uses the relative path to the image which is just the path relative to the image folder; for example if you have a file-structure like the one above
+this would be `/cat` to get one of the files named cat, note the / at the start. Since there is `cat.ascii` and `cat.png` you need to add the extention. If you want to point to `cat.ascii` you need to run
+
+```
+python run.py /cat .ascii
+```
+
+for `cat.png` it would be
+
+```
+python run.py /cat .png
+```
+
+If the filestructure is like the other one above and you want to select `cat.png` you run this command
+
+```
+python /Image/cat
+```
+
+You dont need to add the exention since it isnt ambiguous here
+
+## Regenerating
+
+`run.py` automatically generates the config for the source it uses if it isnt present, when it uses an Image it also generates the raw `.ascii file`. If you want to regenerate all ascii files you can run
 
 ```
 python regenerate.py
 ```
-
-If you dont want to add the images in some subdirectories of your images path add these to your IMAGE_IGNORE in config.py
